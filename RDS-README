@@ -1,0 +1,11 @@
+This is my repository off my GitHub Forked from another who made it Linux
+friendly.  He copied it from TheCherno and we are waqiting for TheCherno 
+to pull the udate into his repository.  Once that is done and TheCherno
+has updated his repository I will switch to syncing his to keep in step 
+with what he is doing.  For now this will have to do.
+
+See the premake5.lua file in the root directory to see my comments on how
+to create a new Sandbox directory for a new OpenGL project.
+
+In case you forget all the binaries go to the bin ... directory!
+ 

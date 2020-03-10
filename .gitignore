@@ -9,6 +9,9 @@ run/
 *imgui.ini
 Makefile
 *.make
+OpenGL-Examples
+OpenGL-FirstTry
+OpenGl-Sandbox
 
 # Visual Studio
 .vs/
