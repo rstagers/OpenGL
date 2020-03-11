@@ -14,6 +14,10 @@ SandboxLayer::~SandboxLayer()
 
 void SandboxLayer::OnAttach()
 {
+    GLint n;
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &n);
+    std::cout << "Max Vetext attributes: " << n << '\n';
+
 	EnableGLDebugging();
 
 	glEnable(GL_DEPTH_TEST);
@@ -29,15 +33,15 @@ void SandboxLayer::OnAttach()
 	glBindVertexArray(m_QuadVA);
 
 	float vertices[] = {
-		-1.5f, -0.5f, 0.0f,
-		-0.5f, -0.5f, 0.0f,
-		-0.5f,  0.5f, 0.0f,
-		-1.5f,  0.5f, 0.0f,
+		-1.5f, -0.5f, 0.0f, 0.3f, 0.4f, 0.1f, 1.0f,
+		-0.5f, -0.5f, 0.0f, 0.3f, 0.4f, 0.1f, 1.0f,  
+		-0.5f,  0.5f, 0.0f, 0.3f, 0.4f, 0.1f, 1.0f,
+		-1.5f,  0.5f, 0.0f, 0.3f, 0.4f, 0.1f, 1.0f,
 		
-         0.5f, -0.5f, 0.0f,
-		 1.5f, -0.5f, 0.0f,
-		 1.5f,  0.5f, 0.0f,
-		 0.5f,  0.5f, 0.0f
+         0.5f, -0.5f, 0.0f, 0.1f, 0.4f, 0.3f, 1.0f,
+		 1.5f, -0.5f, 0.0f, 0.1f, 0.4f, 0.3f, 1.0f,
+		 1.5f,  0.5f, 0.0f, 0.1f, 0.4f, 0.3f, 1.0f,
+		 0.5f,  0.5f, 0.0f, 0.1f, 0.4f, 0.3f, 1.0f
 	};
 
 	glCreateBuffers(1, &m_QuadVB);
@@ -45,9 +49,12 @@ void SandboxLayer::OnAttach()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, 0);
 
-	uint32_t indices[] = { 0, 1, 2, 2, 3, 0,
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (const void *) 12);
+	
+    uint32_t indices[] = { 0, 1, 2, 2, 3, 0,
                            4, 5, 6, 6, 7, 4 };
 	glCreateBuffers(1, &m_QuadIB);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadIB);
