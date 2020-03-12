@@ -33,15 +33,25 @@ void SandboxLayer::OnAttach()
 	glBindVertexArray(m_QuadVA);
 
 	float vertices[] = {
-		-1.5f, -0.5f, 0.0f, 0.3f, 0.4f, 0.1f, 1.0f,
-		-0.5f, -0.5f, 0.0f, 0.3f, 0.4f, 0.1f, 1.0f,  
-		-0.5f,  0.5f, 0.0f, 0.3f, 0.4f, 0.1f, 1.0f,
-		-1.5f,  0.5f, 0.0f, 0.3f, 0.4f, 0.1f, 1.0f,
+		-0.531250, -0.625000, 0.0f, 0.9f, 0.0f, 0.0f, 1.0f,
+		-0.031250, -0.625000, 0.0f, 0.0f, 0.9f, 0.0f, 1.0f,  
+		-0.031250, -0.125000, 0.0f, 0.0f, 0.0f, 0.9f, 1.0f,
+		-0.531250, -0.125000, 0.0f, 0.5f, 0.5f, 0.0f, 1.0f,
 		
-         0.5f, -0.5f, 0.0f, 0.1f, 0.4f, 0.3f, 1.0f,
-		 1.5f, -0.5f, 0.0f, 0.1f, 0.4f, 0.3f, 1.0f,
-		 1.5f,  0.5f, 0.0f, 0.1f, 0.4f, 0.3f, 1.0f,
-		 0.5f,  0.5f, 0.0f, 0.1f, 0.4f, 0.3f, 1.0f
+         0.031250, -0.625000, 0.0f, 0.5f, 0.5f, 0.0f, 1.0f,
+		 0.531250, -0.625000, 0.0f, 0.9f, 0.0f, 0.0f, 1.0f,
+		 0.531250, -0.125000, 0.0f, 0.0f, 0.9f, 0.0f, 1.0f,
+		 0.031250, -0.125000, 0.0f, 0.0f, 0.0f, 0.9f, 1.0f,
+
+         0.031250, -0.062500, 0.0f, 0.0f, 0.0f, 0.9f, 1.0f,
+		 0.531250, -0.062500, 0.0f, 0.5f, 0.5f, 0.0f, 1.0f,  
+		 0.531250, 0.4375000, 0.0f, 0.9f, 0.0f, 0.0f, 1.0f,
+		 0.031250, 0.4375000, 0.0f, 0.0f, 0.9f, 0.0f, 1.0f,
+		
+        -0.531250, -0.062500, 0.0f, 0.0f, 0.9f, 0.0f, 1.0f,
+		-0.031250, -0.062500, 0.0f, 0.0f, 0.0f, 0.9f, 1.0f,
+		-0.031250, 0.4387500, 0.0f, 0.5f, 0.5f, 0.0f, 1.0f,
+		-0.531250, 0.4387500, 0.0f, 0.9f, 0.0f, 0.0f, 1.0f
 	};
 
 	glCreateBuffers(1, &m_QuadVB);
@@ -54,8 +64,11 @@ void SandboxLayer::OnAttach()
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (const void *) 12);
 	
-    uint32_t indices[] = { 0, 1, 2, 2, 3, 0,
-                           4, 5, 6, 6, 7, 4 };
+    uint32_t indices[] = { 0,  1,  2,  2,  3,  0,
+                           4,  5,  6,  6,  7,  4, 
+                           8,  9, 10, 10, 11,  8,
+                          12, 13, 14, 14, 15, 12};
+
 	glCreateBuffers(1, &m_QuadIB);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadIB);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
@@ -108,16 +121,12 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glUniform4fv(location, 1, glm::value_ptr(m_SquareColor));
 
 	glBindVertexArray(m_QuadVA);
-	glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, nullptr);
+	glDrawElements(GL_TRIANGLES, 24, GL_UNSIGNED_INT, nullptr);
 }
 
 void SandboxLayer::OnImGuiRender()
 {
-	/*
     ImGui::Begin("Controls");
-	if (ImGui::ColorEdit4("Square Base Color", glm::value_ptr(m_SquareBaseColor)))
-		m_SquareColor = m_SquareBaseColor;
-	ImGui::ColorEdit4("Square Alternate Color", glm::value_ptr(m_SquareAlternateColor));
+    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);       
 	ImGui::End();
-    */
-}
+ }
