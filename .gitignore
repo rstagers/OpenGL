@@ -3,20 +3,19 @@
 **bin-int/
 !/vendor/bin
 run/
+.vscode/
+
 
 # Files
 *.user
 *imgui.ini
 Makefile
 *.make
+OpenGL-Core/vendor/glfw/GLFW.make
 OpenGL-Examples
-OpenGL-FirstTry
-OpenGl-Sandbox
+OpenGL-FirstTry/OpenGL-FirstTry
+OpenGL-FirstTry/m
+OpenGL-FirstTry/c.sh
+OpenGL-Sandbox
 
-# Visual Studio
-.vs/
-.vscode/
-*.sln
-*.vcxproj
-*.vcxproj.filters
-*.vcxproj.user
+
