@@ -1,9 +1,9 @@
 #include "SandboxLayer.h"
 #include <glm/glm.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 using namespace GLCore;
 using namespace GLCore::Utils;
-
 
 struct Vertex {
     glm::vec3 position;
@@ -18,6 +18,21 @@ SandboxLayer::SandboxLayer()
 
 SandboxLayer::~SandboxLayer()
 {
+}
+// This is crap, becasue I used arrays they cannot be updated.
+// If we used other Vec2 Vec3 Vec4 with indiviual variables and 
+// not array then we could:  v0.position = {-0.531250, -0.625000, 0.0f};
+// more readable that below!
+static std::array< Vertex, 4> CreateQuad(float x, float y)
+{
+    float size = 0.5f;
+
+    Vertex v0 = {glm::vec3(x, y, 0.0f), {glm::vec4(0.9f, 0.0f, 0.0f, 1.0f)}};
+    Vertex v1 = {glm::vec3(x+size, y, 0.0f), {glm::vec4(0.0f, 0.9f, 0.0f, 1.0f)}};
+    Vertex v2 = {glm::vec3(x+size, y+size, 0.0f), {glm::vec4(0.0f, 0.0f, 0.9f, 1.0f)}};
+    Vertex v3 = {glm::vec3(x, y+size, 0.0f), {glm::vec4(0.5f, 0.5f, 0.0f, 1.0f)}};
+    // v0.position[0] += .0125;
+    return {v0,v1,v2,v3};
 }
 
 void SandboxLayer::OnAttach()
@@ -46,11 +61,11 @@ void SandboxLayer::OnAttach()
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *) offsetof(Vertex, position));
-    std::cout << "sizeof(Vertex): " << sizeof(Vertex) << " offsetof(Vertex, position): " << offsetof(Vertex, position) << '\n';
+    //std::cout << "sizeof(Vertex): " << sizeof(Vertex) << " offsetof(Vertex, position): " << offsetof(Vertex, position) << '\n';
 
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *) offsetof(Vertex, color));
-    std::cout << "sizeof(Vertex): " << sizeof(Vertex) << " offsetof(Vertex, color): " << offsetof(Vertex, color) << '\n';
+    //std::cout << "sizeof(Vertex): " << sizeof(Vertex) << " offsetof(Vertex, color): " << offsetof(Vertex, color) << '\n';
 	
     // This buffer would need to be updated we have a possibility of 1000 Vertices so we really need
     // this buffer to be capable of doing that.  It is left at four to try the dynamic buffer...
@@ -73,6 +88,7 @@ void SandboxLayer::OnDetach()
 	glDeleteBuffers(1, &m_QuadIB);
 }
 
+
 void SandboxLayer::OnEvent(Event& event)
 {
 	m_CameraController.OnEvent(event);
@@ -90,50 +106,80 @@ void SandboxLayer::OnEvent(Event& event)
 			m_SquareColor = m_SquareBaseColor;
 			return false;
 		});
+    // Handle window resizing events.    
+    dispatcher.Dispatch<WindowResizeEvent>(
+        [&](WindowResizeEvent& e)
+        {
+            glViewport(0,0, e.GetWidth(), e.GetHeight());
+            return false;
+        });
 }
+
+static glm::vec3 RotatePoint(glm::vec3 vector, float Degrees)
+{
+    glm::mat4 identity = glm::mat4(1.0f);
+    identity = glm::rotate(identity, glm::radians(Degrees), glm::vec3(0.0f, 0.0f, 1.0f));
+    glm::vec3 result = glm::vec3(identity * glm::vec4(vector, 1.0f));
+    return result;
+}
+
 static void SetUniformMat4(uint32_t shader, const char* name, const glm::mat4& matrix)
 {
     int loc = glGetUniformLocation(shader, name);
     glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(matrix));
 }
 
-
-// This is crap, becasue I used arrays they cannot be updated.
-// If we used other Vec2 Vec3 Vec4 with indiviual variables and 
-// not array then we could:  v0.position = {-0.531250, -0.625000, 0.0f};
-// more readable that below!
-static std::array< Vertex, 4> CreateQuad(float x, float y)
-{
-    float size = 0.5f;
-
-    Vertex v0 = {glm::vec3(x, y, 0.0f), {glm::vec4(0.9f, 0.0f, 0.0f, 1.0f)}};
-    Vertex v1 = {glm::vec3(x+size, y, 0.0f), {glm::vec4(0.0f, 0.9f, 0.0f, 1.0f)}};
-    Vertex v2 = {glm::vec3(x+size, y+size, 0.0f), {glm::vec4(0.0f, 0.0f, 0.9f, 1.0f)}};
-    Vertex v3 = {glm::vec3(x, y+size, 0.0f), {glm::vec4(0.5f, 0.5f, 0.0f, 1.0f)}};
-    // v0.position[0] += .0125;
-    return {v0,v1,v2,v3};
-}
-
 void SandboxLayer::OnUpdate(Timestep ts)
 {
+    static int once = 1;
+    static float Degrees1 = 0.0f;
+    static float Degrees2 = 359.0f;
+
 	m_CameraController.OnUpdate(ts);
 
     // Set dynamic buffer...
+    Vertex vertices[4 * 4];
 
     auto q0 = CreateQuad(-0.531250, -0.625000);
-    Vertex vertices[4 * 4];
+    // Now rotate this quad...
+    q0[0].position = RotatePoint(q0[0].position, Degrees1);
+    q0[1].position = RotatePoint(q0[1].position, Degrees1);
+    q0[2].position = RotatePoint(q0[2].position, Degrees1);
+    q0[3].position = RotatePoint(q0[3].position, Degrees1);
+    // Now copy the buffer over
     memcpy(vertices, q0.data(), q0.size() * sizeof(Vertex));
 
     q0 = CreateQuad(0.031250, -0.625000);
+    // Now rotate this quad...
+    q0[0].position = RotatePoint(q0[0].position, Degrees2);
+    q0[1].position = RotatePoint(q0[1].position, Degrees2);
+    q0[2].position = RotatePoint(q0[2].position, Degrees2);
+    q0[3].position = RotatePoint(q0[3].position, Degrees2);
     memcpy(vertices + q0.size(), q0.data(), q0.size() * sizeof(Vertex));
 
     q0 = CreateQuad(0.031250, -0.062500);
+    // Now rotate this quad...
+    q0[0].position = RotatePoint(q0[0].position, Degrees1);
+    q0[1].position = RotatePoint(q0[1].position, Degrees1);
+    q0[2].position = RotatePoint(q0[2].position, Degrees1);
+    q0[3].position = RotatePoint(q0[3].position, Degrees1);
     memcpy(vertices + (q0.size() * 2), q0.data(), q0.size() * sizeof(Vertex));
 
     q0 = CreateQuad(-0.531250, -0.062500);
+    // Now rotate this quad...
+    q0[0].position = RotatePoint(q0[0].position, Degrees2);
+    q0[1].position = RotatePoint(q0[1].position, Degrees2);
+    q0[2].position = RotatePoint(q0[2].position, Degrees2);
+    q0[3].position = RotatePoint(q0[3].position, Degrees2);
     memcpy(vertices + (q0.size() * 3), q0.data(), q0.size() * sizeof(Vertex));
-    
-    //
+
+    Degrees1++;
+    if(Degrees1 >= 359.0f)
+        Degrees1 = 0.0f;
+
+    Degrees2--;
+    if(Degrees2 <= 0.0f)
+        Degrees2 = 359.0f;
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_QuadVB);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
