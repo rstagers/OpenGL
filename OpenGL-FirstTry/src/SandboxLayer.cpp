@@ -59,6 +59,13 @@ static std::array< Vertex, 4> ScaleRotateTranslate(std::array< Vertex, 4> q, flo
 } 
 
 
+static void setFrame(std::array< Vertex, 4>& q0, glm::vec3 texture)
+{
+    q0[0].texcoords = glm::vec2(texture.x, texture.y);
+    q0[1].texcoords = glm::vec2(texture.x + texture.z, texture.y);
+    q0[2].texcoords = glm::vec2(texture.x + texture.z, texture.y + texture.z);
+    q0[3].texcoords = glm::vec2(texture.x, texture.y + texture.z);
+}
 static std::array< Vertex, 4> CreateQuad(float x, float y, float size)
 {
 
@@ -201,7 +208,7 @@ void SandboxLayer::OnAttach()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadIB);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    m_TextureID = LoadTexture("assets/textures/Try.png"); 
+    m_TextureID = LoadTexture("assets/textures/Try2.png"); 
 }
 
 void SandboxLayer::OnDetach()
@@ -240,9 +247,19 @@ void SandboxLayer::OnEvent(Event& event)
 
 void SandboxLayer::OnUpdate(Timestep ts)
 {
+    static int frameCount = 0;
+
     static float Degrees1 = 0.0f;
     static float Degrees2 = 359.0f;
     static float xMove = -1.5625;
+
+    static int SpriteIndex = 0;
+    
+
+    frameCount++;
+    if(frameCount % 60 == 0)
+        ++SpriteIndex &= 3;
+
 
 	m_CameraController.OnUpdate(ts);
 
@@ -253,41 +270,23 @@ void SandboxLayer::OnUpdate(Timestep ts)
 
     auto q0 = CreateQuad(-0.5f, -0.5f, 1.0f);
     auto q1 = ScaleRotateTranslate(q0, Degrees1,-0.2813, -0.275);
-// blue
-    q1[0].texcoords = glm::vec2(0.0f, 0.0f);
-    q1[1].texcoords = glm::vec2(0.0f, 0.5f);
-    q1[2].texcoords = glm::vec2(0.5f, 0.5f);
-    q1[3].texcoords = glm::vec2(0.0f, 0.5f);
+    setFrame(q1, glm::vec3(0.0f + (SpriteIndex * 0.25f), 0.0f, 0.25f));
     memcpy(vertices, q1.data(), q1.size() * sizeof(Vertex));
 
     q1 = ScaleRotateTranslate(q0, Degrees1,0.28125, -0.275);
-// Yellow
-    q1[0].texcoords = glm::vec2(0.5f, 0.0f);
-    q1[1].texcoords = glm::vec2(1.0f, 0.0f);
-    q1[2].texcoords = glm::vec2(1.0f, 0.5f);
-    q1[3].texcoords = glm::vec2(0.5f, 0.5f);
+    setFrame(q1, glm::vec3(0.0f + (SpriteIndex * 0.25f), 0.25f, 0.25f));
     memcpy(vertices + (q1.size() * 1), q1.data(), q1.size() * sizeof(Vertex));
 
     q1 = ScaleRotateTranslate(q0, Degrees1,0.28125, 0.2875);
-// green
-    q1[0].texcoords = glm::vec2(0.5f, 0.5f);
-    q1[1].texcoords = glm::vec2(1.0f, 0.5f);
-    q1[2].texcoords = glm::vec2(1.0f, 1.0f);
-    q1[3].texcoords = glm::vec2(0.5f, 1.0f);
+    setFrame(q1, glm::vec3(0.0f + (SpriteIndex * 0.25f), 0.5f, 0.25f));
     memcpy(vertices + (q1.size() * 2), q1.data(), q1.size() * sizeof(Vertex));
 
     q1 = ScaleRotateTranslate(q0, Degrees1,-0.2813, 0.2875);
-    q1[0].texcoords = glm::vec2(0.0f, 0.5f);
-    q1[1].texcoords = glm::vec2(0.5f, 0.5f);
-    q1[2].texcoords = glm::vec2(0.5f, 1.0f);
-    q1[3].texcoords = glm::vec2(0.0f, 1.0f);
+    setFrame(q1, glm::vec3(0.0f + (SpriteIndex * 0.25f), 0.75f, 0.25f));
     memcpy(vertices + (q1.size() * 3), q1.data(), q1.size() * sizeof(Vertex));
-// All
+
     q1 = ScaleRotateTranslate(q0, Degrees2, 0.0f, 0.0f);
-    q1[0].texcoords = glm::vec2(0.0f, 0.0f);
-    q1[1].texcoords = glm::vec2(1.0f, 0.0f);
-    q1[2].texcoords = glm::vec2(1.0f, 1.0f);
-    q1[3].texcoords = glm::vec2(0.0f, 1.0f);
+    // Defualt is entire texture.... 
     memcpy(vertices + (q1.size() * 4), q1.data(), q1.size() * sizeof(Vertex));
 
     q1 = ScaleRotateTranslate(q0, 0.0f, xMove, -0.75f);
