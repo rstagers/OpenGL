@@ -18,7 +18,7 @@ struct Vertex {
     glm::vec3 position;
     glm::vec4 color;
     glm::vec2 texcoords;
-    glm::vec1 TextureID;
+    glm::vec1 TextureID;    // Not really using this ....  
 };
 
 //static glm::vec3 TransPoint(glm::vec3 vector, float tx, float ty)
@@ -61,7 +61,7 @@ static std::array< Vertex, 4> ScaleRotateTranslate(std::array< Vertex, 4> q, flo
 
 static std::array< Vertex, 4> CreateQuad(float x, float y, float size)
 {
-//    float size = 0.5f;
+
 
     Vertex v0 = {glm::vec3(x, y, 0.0f),           
                 {glm::vec4(0.9f, 0.0f, 0.0f, 1.0f)}, 
@@ -86,8 +86,6 @@ static std::array< Vertex, 4> CreateQuad(float x, float y, float size)
                 {glm::vec2(0.0f, 1.0f)},
                 {glm::vec1(0.0f)}
                 };
-
-    // v0.position[0] += .0125;
     return {v0,v1,v2,v3};
 }
 
@@ -99,9 +97,6 @@ uint32_t indices[] = {
     16, 17, 18, 18, 19, 16,
     20, 21, 22, 22, 23, 20
 };
-
-
-
 
 static GLuint LoadTexture(const std::string& path)
 {
@@ -257,31 +252,52 @@ void SandboxLayer::OnUpdate(Timestep ts)
     Vertex vertices[Squares * 4];
 
     auto q0 = CreateQuad(-0.5f, -0.5f, 1.0f);
-
     auto q1 = ScaleRotateTranslate(q0, Degrees1,-0.2813, -0.275);
+// blue
+    q1[0].texcoords = glm::vec2(0.0f, 0.0f);
+    q1[1].texcoords = glm::vec2(0.0f, 0.5f);
+    q1[2].texcoords = glm::vec2(0.5f, 0.5f);
+    q1[3].texcoords = glm::vec2(0.0f, 0.5f);
     memcpy(vertices, q1.data(), q1.size() * sizeof(Vertex));
 
     q1 = ScaleRotateTranslate(q0, Degrees1,0.28125, -0.275);
+// Yellow
+    q1[0].texcoords = glm::vec2(0.5f, 0.0f);
+    q1[1].texcoords = glm::vec2(1.0f, 0.0f);
+    q1[2].texcoords = glm::vec2(1.0f, 0.5f);
+    q1[3].texcoords = glm::vec2(0.5f, 0.5f);
     memcpy(vertices + (q1.size() * 1), q1.data(), q1.size() * sizeof(Vertex));
 
     q1 = ScaleRotateTranslate(q0, Degrees1,0.28125, 0.2875);
+// green
+    q1[0].texcoords = glm::vec2(0.5f, 0.5f);
+    q1[1].texcoords = glm::vec2(1.0f, 0.5f);
+    q1[2].texcoords = glm::vec2(1.0f, 1.0f);
+    q1[3].texcoords = glm::vec2(0.5f, 1.0f);
     memcpy(vertices + (q1.size() * 2), q1.data(), q1.size() * sizeof(Vertex));
 
     q1 = ScaleRotateTranslate(q0, Degrees1,-0.2813, 0.2875);
+    q1[0].texcoords = glm::vec2(0.0f, 0.5f);
+    q1[1].texcoords = glm::vec2(0.5f, 0.5f);
+    q1[2].texcoords = glm::vec2(0.5f, 1.0f);
+    q1[3].texcoords = glm::vec2(0.0f, 1.0f);
     memcpy(vertices + (q1.size() * 3), q1.data(), q1.size() * sizeof(Vertex));
-
+// All
     q1 = ScaleRotateTranslate(q0, Degrees2, 0.0f, 0.0f);
+    q1[0].texcoords = glm::vec2(0.0f, 0.0f);
+    q1[1].texcoords = glm::vec2(1.0f, 0.0f);
+    q1[2].texcoords = glm::vec2(1.0f, 1.0f);
+    q1[3].texcoords = glm::vec2(0.0f, 1.0f);
     memcpy(vertices + (q1.size() * 4), q1.data(), q1.size() * sizeof(Vertex));
 
     q1 = ScaleRotateTranslate(q0, 0.0f, xMove, -0.75f);
     memcpy(vertices + (q1.size() * 5), q1.data(), q1.size() * sizeof(Vertex));
 
-
     Degrees1 += 1.0f;
     if(Degrees1 >= 359.0f)
         Degrees1 = 0.0f;
 
-    Degrees2 -= 15.0f;
+    Degrees2 -= 2.0f;
     if(Degrees2 <= 0.0f)
         Degrees2 = 359.0f;
 
