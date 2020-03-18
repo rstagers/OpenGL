@@ -3,11 +3,6 @@
 #include <glm/gtx/string_cast.hpp>
 #include <unistd.h>
 
-// Moved this from the OpenGL-Core/vendor/stb_image directory.
-// Modified the Makefile.  I am sure there si a better way but 
-// I didn't know how.  This works, will try to find out how to 
-// include this code in place. Should really only have to compile
-// once and include it in linking.
 #include "stb_image.h"
 
 using namespace GLCore;
@@ -61,10 +56,10 @@ static std::array< Vertex, 4> ScaleRotateTranslate(std::array< Vertex, 4> q, flo
 
 static void setFrame(std::array< Vertex, 4>& q0, glm::vec3 texture)
 {
-    q0[0].texcoords = glm::vec2(texture.x, texture.y);
-    q0[1].texcoords = glm::vec2(texture.x + texture.z, texture.y);
-    q0[2].texcoords = glm::vec2(texture.x + texture.z, texture.y + texture.z);
-    q0[3].texcoords = glm::vec2(texture.x, texture.y + texture.z);
+    q0[0].texcoords = glm::vec2(texture.x, 0);
+    q0[1].texcoords = glm::vec2(texture.x + texture.z, 0);
+    q0[2].texcoords = glm::vec2(texture.x + texture.z, 1);
+    q0[3].texcoords = glm::vec2(texture.x, 1);
 }
 static std::array< Vertex, 4> CreateQuad(float x, float y, float size)
 {
@@ -119,9 +114,6 @@ static GLuint LoadTexture(const std::string& path)
         std::cout << stbi_failure_reason() << '\n'; 
         exit(-1);
     }
-    //glGenTextures(1, &t_TextureID);	
-	//glBindTexture(GL_TEXTURE_2D, t_TextureID);
-    //glPixelStorei(GL_UNPACK_ALIGNMENT, t_TextureID);
 
     glCreateTextures(GL_TEXTURE_2D, 1, &t_TextureID);	
 	glBindTexture(GL_TEXTURE_2D, t_TextureID);
@@ -134,6 +126,8 @@ static GLuint LoadTexture(const std::string& path)
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, t_Width, t_Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, t_LocalBuffer);
 	
+    std::cout << t_Width << 'x' << t_Height << '\n';
+
     if(t_LocalBuffer)
 		stbi_image_free(t_LocalBuffer);
 
@@ -188,12 +182,10 @@ void SandboxLayer::OnAttach()
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *) offsetof(Vertex, position));
-    //std::cout << "sizeof(Vertex): " << sizeof(Vertex) << " offsetof(Vertex, position): " << offsetof(Vertex, position) << '\n';
-
+ 
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *) offsetof(Vertex, color));
-    //std::cout << "sizeof(Vertex): " << sizeof(Vertex) << " offsetof(Vertex, color): " << offsetof(Vertex, color) << '\n';
-
+ 
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void *) offsetof(Vertex, texcoords));
 
@@ -208,7 +200,7 @@ void SandboxLayer::OnAttach()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_QuadIB);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    m_TextureID = LoadTexture("assets/textures/Try2.png"); 
+    m_TextureID = LoadTexture("assets/textures/exp3.jpg"); 
 }
 
 void SandboxLayer::OnDetach()
@@ -257,9 +249,8 @@ void SandboxLayer::OnUpdate(Timestep ts)
     
 
     frameCount++;
-    if(frameCount % 60 == 0)
-        ++SpriteIndex &= 3;
-
+    if(frameCount % 3 == 0)
+        ++SpriteIndex &= 15;
 
 	m_CameraController.OnUpdate(ts);
 
@@ -269,27 +260,29 @@ void SandboxLayer::OnUpdate(Timestep ts)
     Vertex vertices[Squares * 4];
 
     auto q0 = CreateQuad(-0.5f, -0.5f, 1.0f);
-    auto q1 = ScaleRotateTranslate(q0, Degrees1,-0.2813, -0.275);
-    setFrame(q1, glm::vec3(0.0f + (SpriteIndex * 0.25f), 0.0f, 0.25f));
+    auto q1 = ScaleRotateTranslate(q0, Degrees1,-0.2813*1.5, -0.275*1.5);
+    setFrame(q1, glm::vec3((SpriteIndex * 0.0625f), 1.0f, 0.0625f));
+
     memcpy(vertices, q1.data(), q1.size() * sizeof(Vertex));
 
-    q1 = ScaleRotateTranslate(q0, Degrees1,0.28125, -0.275);
-    setFrame(q1, glm::vec3(0.0f + (SpriteIndex * 0.25f), 0.25f, 0.25f));
+    q1 = ScaleRotateTranslate(q0, Degrees1,0.28125*1.5, -0.275*1.5);
+    setFrame(q1, glm::vec3((SpriteIndex * 0.0625f), 1.0f, 0.0625f));
     memcpy(vertices + (q1.size() * 1), q1.data(), q1.size() * sizeof(Vertex));
 
-    q1 = ScaleRotateTranslate(q0, Degrees1,0.28125, 0.2875);
-    setFrame(q1, glm::vec3(0.0f + (SpriteIndex * 0.25f), 0.5f, 0.25f));
+    q1 = ScaleRotateTranslate(q0, Degrees1,0.28125*1.5, 0.2875*1.5);
+    setFrame(q1, glm::vec3((SpriteIndex * 0.0625f), 1.0f, 0.0625f));
     memcpy(vertices + (q1.size() * 2), q1.data(), q1.size() * sizeof(Vertex));
 
-    q1 = ScaleRotateTranslate(q0, Degrees1,-0.2813, 0.2875);
-    setFrame(q1, glm::vec3(0.0f + (SpriteIndex * 0.25f), 0.75f, 0.25f));
+    q1 = ScaleRotateTranslate(q0, Degrees1,-0.2813*1.5, 0.2875*1.5);
+    setFrame(q1, glm::vec3((SpriteIndex * 0.0625f), 1.0f, 0.0625f));
     memcpy(vertices + (q1.size() * 3), q1.data(), q1.size() * sizeof(Vertex));
 
     q1 = ScaleRotateTranslate(q0, Degrees2, 0.0f, 0.0f);
-    // Defualt is entire texture.... 
+    setFrame(q1, glm::vec3((SpriteIndex * 0.0625f), 1.0f, 0.0625f));
     memcpy(vertices + (q1.size() * 4), q1.data(), q1.size() * sizeof(Vertex));
 
     q1 = ScaleRotateTranslate(q0, 0.0f, xMove, -0.75f);
+    setFrame(q1, glm::vec3((SpriteIndex * 0.0625f), 1.0f, 0.0625f));
     memcpy(vertices + (q1.size() * 5), q1.data(), q1.size() * sizeof(Vertex));
 
     Degrees1 += 1.0f;
@@ -307,7 +300,7 @@ void SandboxLayer::OnUpdate(Timestep ts)
 	glBindBuffer(GL_ARRAY_BUFFER, m_QuadVB);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(m_Shader->GetRendererID());

@@ -13,5 +13,9 @@ void main()
 {
 //	o_Color = vec4(v_TexIndex, v_TexIndex, v_TexIndex, 1.0);
     int index = int(v_TexIndex);
-    o_Color = texture(u_Texture, v_TexCoord);
+    vec4 texColor = texture(u_Texture, v_TexCoord);
+    if(texColor.r < 0.1f && texColor.g < 0.1f  && texColor.b < 0.1f) {
+        discard;
+    }
+    o_Color = texColor;
 }
